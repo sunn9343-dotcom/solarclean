@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SolarClean">
+<meta name="theme-color" content="#0a0f1e">
+<title>SolarClean</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0a0f1e;
+    --surface: #101828;
+    --border: #1e2d45;
+    --text: #e8f0ff;
+    --muted: #4a6080;
+    --blue: #378ADD;
+    --blue-dim: #0a1e35;
+    --blue-border: #1a5080;
+    --green: #22c55e;
+    --green-dim: #0a2a10;
+    --green-border: #1a6030;
+    --red: #e06060;
+    --red-dim: #1a0a0a;
+    --red-border: #5c1a1a;
+    --cyan: #00d4ff;
+    --water: #40a0d0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Kanit', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+
+  .app { max-width: 420px; margin: 0 auto; padding: 0 0 80px; }
+
+  /* Header */
+  .header {
+    padding: 52px 20px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .header-title { font-size: 22px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .conn-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 6px 12px; cursor: pointer;
+  }
+  .conn-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--red); transition: background 0.3s;
+  }
+  .conn-dot.on { background: var(--green); }
+  .conn-text { font-size: 11px; color: var(--muted); }
+
+  /* IP Setup */
+  .ip-setup {
+    margin: 0 16px 12px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 14px; padding: 14px;
+  }
+  .ip-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .ip-row { display: flex; gap: 8px; }
+  .ip-input {
+    flex: 1; background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 8px; padding: 9px 12px; color: var(--text);
+    font-family: 'Kanit', sans-serif; font-size: 13px; outline: none;
+  }
+  .ip-input:focus { border-color: var(--blue); }
+  .ip-btn {
+    background: var(--blue-dim); border: 0.5px solid var(--blue-border);
+    border-radius: 8px; padding: 9px 14px; color: var(--blue);
+    font-family: 'Kanit', sans-serif; font-size: 13px; cursor: pointer;
+  }
+
+  /* Section label */
+  .section { padding: 0 20px; margin-bottom: 8px; margin-top: 16px; }
+  .section-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* Card */
+  .card {
+    margin: 0 16px 10px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 16px; padding: 14px 16px;
+  }
+
+  /* Panel card */
+  .panel-name { font-size: 14px; font-weight: 500; }
+  .panel-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .progress-bar { height: 3px; background: #1a2540; border-radius: 2px; margin: 12px 0 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 72%; }
+  .prog-row { display: flex; justify-content: space-between; }
+  .prog-l { font-size: 10px; color: var(--muted); }
+  .prog-r { font-size: 10px; color: var(--water); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 0 16px 10px; }
+  .stat { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; }
+  .stat-val { font-size: 16px; font-weight: 500; }
+  .stat-unit { font-size: 9px; color: var(--muted); }
+  .stat-label { font-size: 9px; color: var(--muted); margin-top: 3px; }
+
+  /* Main button */
+  .main-btn {
+    margin: 0 16px 10px;
+    background: var(--blue-dim); border: 0.5px solid var(--blue-border);
+    border-radius: 14px; padding: 16px; display: flex;
+    align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer; transition: all 0.2s; user-select: none;
+    -webkit-user-select: none;
+  }
+  .main-btn:active { transform: scale(0.98); }
+  .main-btn.running { background: var(--green-dim); border-color: var(--green-border); }
+  .main-btn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-border); }
+  .main-btn.running .main-btn-dot { background: var(--green); animation: pulse 1s infinite; }
+  .main-btn-text { font-size: 14px; font-weight: 500; color: var(--blue); font-family: 'Kanit', sans-serif; }
+  .main-btn.running .main-btn-text { color: var(--green); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Control grid */
+  .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 16px 10px; }
+  .ctrl-btn {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 13px 10px; text-align: center;
+    cursor: pointer; transition: background 0.15s; user-select: none;
+    -webkit-user-select: none;
+  }
+  .ctrl-btn:active { transform: scale(0.97); }
+  .ctrl-btn.blue { background: var(--blue-dim); border-color: var(--blue-border); }
+  .ctrl-btn.red { background: var(--red-dim); border-color: var(--red-border); }
+  .ctrl-icon { font-size: 18px; margin-bottom: 4px; }
+  .ctrl-label { font-size: 11px; color: var(--muted); font-family: 'Kanit', sans-serif; }
+  .ctrl-btn.blue .ctrl-label { color: var(--blue); }
+  .ctrl-btn.red .ctrl-label { color: var(--red); }
+
+  /* Water buttons */
+  .water-row { display: flex; gap: 8px; margin: 0 16px 10px; }
+  .water-btn {
+    flex: 1; background: #081828; border: 0.5px solid #0f4060;
+    border-radius: 12px; padding: 12px 8px; text-align: center;
+    cursor: pointer; transition: all 0.2s; user-select: none;
+    -webkit-user-select: none;
+  }
+  .water-btn:active { transform: scale(0.97); }
+  .water-btn.active { background: #0a2535; border-color: #1a6080; }
+  .water-icon { font-size: 20px; margin-bottom: 4px; }
+  .water-label { font-size: 11px; color: var(--water); font-family: 'Kanit', sans-serif; }
+  .water-sub { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* Bottom nav */
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 0.5px solid var(--border);
+    display: flex; justify-content: space-around; padding: 10px 0 20px;
+    max-width: 420px; margin: 0 auto;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 16px; }
+  .nav-icon { font-size: 18px; }
+  .nav-label { font-size: 9px; color: var(--muted); font-family: 'Kanit', sans-serif; }
+  .nav-item.active .nav-label { color: var(--blue); }
+  .nav-item.active .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--blue); margin: 1px auto 0; }
+
+  /* Page: ตั้งเวลา */
+  .schedule-page { display: none; padding: 52px 16px 20px; }
+  .schedule-page.show { display: block; }
+  .page-title { font-size: 18px; font-weight: 500; margin-bottom: 20px; padding: 0 4px; }
+
+  .time-picker { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0; }
+  .time-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .time-arrow { font-size: 18px; color: var(--muted); cursor: pointer; padding: 4px 12px; border-radius: 8px; }
+  .time-arrow:active { background: var(--border); }
+  .time-val { font-size: 32px; font-weight: 500; min-width: 60px; text-align: center; }
+  .time-sep { font-size: 32px; color: var(--muted); margin-bottom: 32px; }
+  .ampm-col { display: flex; flex-direction: column; gap: 6px; margin-left: 6px; }
+  .ampm-btn {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--muted);
+    cursor: pointer; font-family: 'Kanit', sans-serif;
+  }
+  .ampm-btn.active { background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue); }
+
+  .days-row { display: flex; gap: 6px; justify-content: space-between; margin-top: 4px; }
+  .day-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--surface); border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--muted); cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+  }
+  .day-btn.active { background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue); }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .mode-btn {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 12px 10px; cursor: pointer;
+  }
+  .mode-btn.active { background: var(--blue-dim); border-color: var(--blue-border); }
+  .mode-icon { font-size: 18px; margin-bottom: 4px; }
+  .mode-name { font-size: 12px; font-weight: 500; font-family: 'Kanit', sans-serif; }
+  .mode-desc { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'Kanit', sans-serif; }
+
+  .sched-list { display: flex; flex-direction: column; gap: 7px; }
+  .sched-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #0d1828; border: 0.5px solid #1a2840;
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .sched-time { font-size: 14px; font-weight: 500; }
+  .sched-days { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .sched-mode {
+    font-size: 10px; color: #2a6090; background: #081828;
+    border: 0.5px solid #0f4060; border-radius: 6px; padding: 2px 8px;
+  }
+  .sched-del { color: var(--muted); font-size: 14px; cursor: pointer; padding: 4px 8px; }
+
+  .save-btn {
+    width: 100%; background: var(--blue-dim); border: 0.5px solid var(--blue-border);
+    border-radius: 14px; padding: 15px; color: var(--blue);
+    font-size: 14px; font-weight: 500; cursor: pointer; text-align: center;
+    margin-top: 14px; font-family: 'Kanit', sans-serif;
+  }
+  .save-btn:active { transform: scale(0.98); }
+
+  .toast {
+    background: #0a2510; border: 0.5px solid #1a5030;
+    border-radius: 10px; padding: 10px 14px; color: #40c870;
+    font-size: 12px; text-align: center; margin-top: 8px;
+    display: none; font-family: 'Kanit', sans-serif;
+  }
+
+  /* Page: ตั้งค่า */
+  .settings-page { display: none; padding: 52px 16px 20px; }
+  .settings-page.show { display: block; }
+
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .setting-name { font-size: 13px; font-weight: 500; }
+  .setting-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .speed-val { font-size: 13px; color: var(--blue); min-width: 30px; text-align: right; }
+  input[type=range] {
+    width: 120px; accent-color: var(--blue);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- หน้าควบคุม -->
+  <div id="page-control">
+    <div class="header">
+      <div>
+        <div class="header-title">SolarClean</div>
+        <div class="header-sub">ระบบล้างแผงอัตโนมัติ</div>
+      </div>
+      <div class="conn-badge" onclick="toggleConnect()">
+        <div class="conn-dot" id="conn-dot"></div>
+        <span class="conn-text" id="conn-text">ไม่ได้เชื่อมต่อ</span>
+      </div>
+    </div>
+
+    <!-- IP Setup -->
+    <div class="ip-setup">
+      <div class="ip-label">IP Address ของ ESP32</div>
+      <div class="ip-row">
+        <input class="ip-input" id="ip-input" type="text" value="172.16.0.209" placeholder="192.168.1.xxx">
+        <div class="ip-btn" onclick="connect()">เชื่อมต่อ</div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">แผงโซล่าเซลล์</div></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="panel-name">แผง A — หลังบ้าน</div>
+          <div class="panel-sub">ประสิทธิภาพปัจจุบัน</div>
+        </div>
+        <div style="font-size:11px;color:#22c55e;background:#0d2a1a;border:0.5px solid #1a5c30;border-radius:20px;padding:3px 10px">เปิดใช้</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <div class="prog-row">
+        <span class="prog-l">72% Efficiency</span>
+        <span class="prog-r">ล้างล่าสุด: 2 วันก่อน</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val">3.2<span class="stat-unit">kW</span></div>
+        <div class="stat-label">พลังงาน</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="pos-val">0<span class="stat-unit">%</span></div>
+        <div class="stat-label">ตำแหน่ง</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="timer-val">0<span class="stat-unit">s</span></div>
+        <div class="stat-label">เวลาทำงาน</div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">ควบคุมการล้าง</div></div>
+    <div class="main-btn" id="main-btn" onclick="toggleClean()">
+      <div class="main-btn-dot" id="main-dot"></div>
+      <span class="main-btn-text" id="main-text">เริ่มล้างแผง</span>
+    </div>
+
+    <div class="ctrl-grid">
+      <div class="ctrl-btn blue" onclick="send('moveLeft')">
+        <div class="ctrl-icon">◀</div>
+        <div class="ctrl-label">เลื่อนซ้าย</div>
+      </div>
+      <div class="ctrl-btn blue" onclick="send('moveRight')">
+        <div class="ctrl-icon">▶</div>
+        <div class="ctrl-label">เลื่อนขวา</div>
+      </div>
+      <div class="ctrl-btn red" onclick="emergencyStop()">
+        <div class="ctrl-icon">■</div>
+        <div class="ctrl-label">หยุดฉุกเฉิน</div>
+      </div>
+      <div class="ctrl-btn" onclick="send('reset')">
+        <div class="ctrl-icon">↺</div>
+        <div class="ctrl-label">รีเซ็ตตำแหน่ง</div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">ระบบน้ำ</div></div>
+    <div class="water-row">
+      <div class="water-btn" id="btn-water" onclick="toggleWater()">
+        <div class="water-icon">💧</div>
+        <div class="water-label">ปล่อยน้ำ</div>
+        <div class="water-sub" id="water-sub">ปิดอยู่</div>
+      </div>
+      <div class="water-btn" id="btn-soap" onclick="toggleSoap()">
+        <div class="water-icon">🧴</div>
+        <div class="water-label">น้ำ + น้ำยา</div>
+        <div class="water-sub" id="soap-sub">ปิดอยู่</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าตั้งเวลา -->
+  <div class="schedule-page" id="page-schedule">
+    <div class="page-title">ตั้งเวลาล้างอัตโนมัติ</div>
+
+    <div class="section"><div class="section-label">เวลาที่ต้องการ</div></div>
+    <div class="card">
+      <div class="time-picker">
+        <div class="time-col">
+          <div class="time-arrow" onclick="changeHour(1)">▲</div>
+          <div class="time-val" id="s-hour">07</div>
+          <div class="time-arrow" onclick="changeHour(-1)">▼</div>
+        </div>
+        <div class="time-sep">:</div>
+        <div class="time-col">
+          <div class="time-arrow" onclick="changeMin(1)">▲</div>
+          <div class="time-val" id="s-min">00</div>
+          <div class="time-arrow" onclick="changeMin(-1)">▼</div>
+        </div>
+        <div class="ampm-col">
+          <div class="ampm-btn active" id="am-btn" onclick="setAMPM('AM')">AM</div>
+          <div class="ampm-btn" id="pm-btn" onclick="setAMPM('PM')">PM</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">วันที่ล้าง</div></div>
+    <div class="card">
+      <div class="days-row" id="days-row">
+        <div class="day-btn active" onclick="toggleDay(this)">จ</div>
+        <div class="day-btn" onclick="toggleDay(this)">อ</div>
+        <div class="day-btn active" onclick="toggleDay(this)">พ</div>
+        <div class="day-btn" onclick="toggleDay(this)">พฤ</div>
+        <div class="day-btn active" onclick="toggleDay(this)">ศ</div>
+        <div class="day-btn" onclick="toggleDay(this)">ส</div>
+        <div class="day-btn" onclick="toggleDay(this)">อา</div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">โหมดการล้าง</div></div>
+    <div class="mode-grid" style="margin:0 0 10px">
+      <div class="mode-btn active" id="mode-water" onclick="setMode('water')">
+        <div class="mode-icon">💧</div>
+        <div class="mode-name">น้ำเปล่า</div>
+        <div class="mode-desc">ประหยัดน้ำยา</div>
+      </div>
+      <div class="mode-btn" id="mode-soap" onclick="setMode('soap')">
+        <div class="mode-icon">🧴</div>
+        <div class="mode-name">น้ำ + น้ำยา</div>
+        <div class="mode-desc">สะอาดลึกขึ้น</div>
+      </div>
+    </div>
+
+    <div class="section"><div class="section-label">ตารางที่บันทึกไว้</div></div>
+    <div class="card">
+      <div class="sched-list" id="sched-list">
+        <div class="sched-item">
+          <div>
+            <div class="sched-time">06:00 AM</div>
+            <div class="sched-days">จ · พ · ศ</div>
+          </div>
+          <div class="sched-mode">น้ำเปล่า</div>
+          <div class="sched-del" onclick="this.closest('.sched-item').remove()">✕</div>
+        </div>
+      </div>
+    </div>
+    <div class="save-btn" onclick="saveSchedule()">+ บันทึกตาราง</div>
+    <div class="toast" id="toast">✓ บันทึกตารางสำเร็จ</div>
+  </div>
+
+  <!-- หน้าตั้งค่า -->
+  <div class="settings-page" id="page-settings">
+    <div class="page-title">ตั้งค่าระบบ</div>
+    <div class="card">
+      <div class="setting-row">
+        <div>
+          <div class="setting-name">ความเร็วมอเตอร์</div>
+          <div class="setting-sub">ปรับความเร็วสายพาน</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="range" min="50" max="255" value="200" oninput="setSpeed(this.value)">
+          <div class="speed-val" id="speed-val">200</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-name">แจ้งเตือนก่อนล้าง</div>
+          <div class="setting-sub">แจ้งเตือน 5 นาทีก่อน</div>
+        </div>
+        <div style="font-size:12px;color:var(--blue)">เปิด</div>
+      </div>
+      <div class="setting-row" style="border:none">
+        <div>
+          <div class="setting-name">IP ของ ESP32</div>
+          <div class="setting-sub" id="ip-display">172.16.0.209</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted)" onclick="showPage('control')">แก้ไข</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="nav">
+  <div class="nav-item active" id="nav-control" onclick="showPage('control')">
+    <div class="nav-icon">⚡</div>
+    <div class="nav-label">ควบคุม</div>
+    <div class="nav-dot"></div>
+  </div>
+  <div class="nav-item" id="nav-schedule" onclick="showPage('schedule')">
+    <div class="nav-icon">⏱</div>
+    <div class="nav-label">ตั้งเวลา</div>
+  </div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
+    <div class="nav-icon">⚙</div>
+    <div class="nav-label">ตั้งค่า</div>
+  </div>
+</div>
+
+<script>
+// ===== WebSocket =====
+let ws = null;
+let cleaning = false, waterOn = false, soapOn = false;
+let timer = 0, timerInterval = null;
+let hour = 7, min = 0, ampm = 'AM', mode = 'water';
+
+function connect() {
+  const ip = document.getElementById('ip-input').value.trim();
+  if (!ip) return;
+  document.getElementById('ip-display').textContent = ip;
+
+  if (ws) ws.close();
+  try {
+    ws = new WebSocket(`ws://${ip}/ws`);
+    ws.onopen = () => {
+      setConn(true);
+    };
+    ws.onclose = () => setConn(false);
+    ws.onerror = () => setConn(false);
+    ws.onmessage = (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        if (d.cleaning !== undefined) updateCleaning(d.cleaning);
+        if (d.water !== undefined) updateWater(d.water);
+        if (d.soap !== undefined) updateSoap(d.soap);
+      } catch(err) {}
+    };
+  } catch(e) { setConn(false); }
+}
+
+function toggleConnect() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.close(); ws = null; setConn(false);
+  } else {
+    connect();
+  }
+}
+
+function setConn(on) {
+  document.getElementById('conn-dot').className = 'conn-dot' + (on ? ' on' : '');
+  document.getElementById('conn-text').textContent = on ? 'ESP32' : 'ไม่ได้เชื่อมต่อ';
+}
+
+function send(action, value) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    alert('ยังไม่ได้เชื่อมต่อ ESP32 ครับ\nกรอก IP แล้วกด "เชื่อมต่อ" ก่อน');
+    return;
+  }
+  const msg = value !== undefined ? JSON.stringify({action, value}) : JSON.stringify({action});
+  ws.send(msg);
+}
+
+// ===== Controls =====
+function toggleClean() {
+  cleaning = !cleaning;
+  updateCleaning(cleaning);
+  send(cleaning ? 'start' : 'stop');
+  if (cleaning) {
+    timerInterval = setInterval(() => {
+      timer++;
+      document.getElementById('timer-val').innerHTML = timer + '<span class="stat-unit">s</span>';
+      const pos = Math.min(100, Math.floor((timer % 50) * 2));
+      document.getElementById('pos-val').innerHTML = pos + '<span class="stat-unit">%</span>';
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+  }
+}
+
+function updateCleaning(on) {
+  cleaning = on;
+  const btn = document.getElementById('main-btn');
+  const txt = document.getElementById('main-text');
+  btn.className = 'main-btn' + (on ? ' running' : '');
+  txt.textContent = on ? 'กำลังล้างแผง...' : 'เริ่มล้างแผง';
+}
+
+function emergencyStop() {
+  cleaning = false;
+  clearInterval(timerInterval);
+  updateCleaning(false);
+  send('emergencyStop');
+}
+
+function toggleWater() {
+  waterOn = !waterOn;
+  updateWater(waterOn);
+  send('water', waterOn);
+}
+function updateWater(on) {
+  waterOn = on;
+  document.getElementById('btn-water').className = 'water-btn' + (on ? ' active' : '');
+  document.getElementById('water-sub').textContent = on ? 'เปิดอยู่' : 'ปิดอยู่';
+}
+
+function toggleSoap() {
+  soapOn = !soapOn;
+  updateSoap(soapOn);
+  send('soap', soapOn);
+}
+function updateSoap(on) {
+  soapOn = on;
+  document.getElementById('btn-soap').className = 'water-btn' + (on ? ' active' : '');
+  document.getElementById('soap-sub').textContent = on ? 'เปิดอยู่' : 'ปิดอยู่';
+}
+
+function setSpeed(v) {
+  document.getElementById('speed-val').textContent = v;
+  send('speed', parseInt(v));
+}
+
+// ===== Navigation =====
+function showPage(page) {
+  document.getElementById('page-control').style.display = page === 'control' ? 'block' : 'none';
+  document.getElementById('page-schedule').className = 'schedule-page' + (page === 'schedule' ? ' show' : '');
+  document.getElementById('page-settings').className = 'settings-page' + (page === 'settings' ? ' show' : '');
+  ['control','schedule','settings'].forEach(p => {
+    const el = document.getElementById('nav-' + p);
+    el.className = 'nav-item' + (p === page ? ' active' : '');
+    el.innerHTML = el.innerHTML.replace(/<div class="nav-dot">.*?<\/div>/,'');
+    if (p === page) el.innerHTML += '<div class="nav-dot"></div>';
+  });
+}
+
+// ===== Schedule =====
+function pad(n) { return String(n).padStart(2,'0'); }
+function changeHour(d) { hour = ((hour-1+d+12)%12)+1; document.getElementById('s-hour').textContent = pad(hour); }
+function changeMin(d) { min = (min+d*5+60)%60; document.getElementById('s-min').textContent = pad(min); }
+function setAMPM(v) {
+  ampm = v;
+  document.getElementById('am-btn').className = 'ampm-btn' + (v==='AM'?' active':'');
+  document.getElementById('pm-btn').className = 'ampm-btn' + (v==='PM'?' active':'');
+}
+function toggleDay(el) { el.classList.toggle('active'); }
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-water').className = 'mode-btn' + (m==='water'?' active':'');
+  document.getElementById('mode-soap').className = 'mode-btn' + (m==='soap'?' active':'');
+}
+function saveSchedule() {
+  const activeDays = [...document.querySelectorAll('.day-btn.active')].map(d => d.textContent);
+  const dayStr = activeDays.length === 7 ? 'ทุกวัน' : activeDays.join(' · ');
+  const timeStr = pad(hour) + ':' + pad(min) + ' ' + ampm;
+  const modeStr = mode === 'water' ? 'น้ำเปล่า' : 'น้ำ + น้ำยา';
+  const item = document.createElement('div');
+  item.className = 'sched-item';
+  item.innerHTML = `<div><div class="sched-time">${timeStr}</div><div class="sched-days">${dayStr}</div></div><div class="sched-mode">${modeStr}</div><div class="sched-del" onclick="this.closest('.sched-item').remove()">✕</div>`;
+  document.getElementById('sched-list').appendChild(item);
+  const t = document.getElementById('toast');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2000);
+}
+
+// เชื่อมต่ออัตโนมัติเมื่อเปิดแอป
+window.onload = () => connect();
+</script>
+</body>
+</html>
